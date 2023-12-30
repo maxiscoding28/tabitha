@@ -1,0 +1,136 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+html,
+body {
+    width: 100%;
+    height: 100%;
+    font-family: monospace;
+    font-size: 12px;
+
+}
+#header {
+    position: fixed;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    box-sizing: border-box;
+    padding: 7px;
+    background-color: #e8a973;
+    font-weight: bold;
+    height: 75px;
+}
+#tab-table {
+    width: 100%;
+    padding: 60px 0 110px 0;
+}
+#control-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 120px;
+    background-color: #e8a973;
+}
+.logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.icon {
+    width: 55px;
+    height: 55px;
+    padding-right: 10px;
+}
+.page-title {
+    position: relative;
+    left: -55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+    font-size: 18px;
+}
+.group-settings {
+    display: flex;
+}
+.color-grid {
+    display: grid;
+    background-color: black;
+    padding: 5px;
+    gap: 5px;
+    grid-template-columns: repeat(5, 1fr);
+}
+.color-tile {
+    width: 30px;
+    height: 30px;
+    max-width: 60px;
+    cursor: pointer;
+    transform: rotate(0deg);
+}
+.color-tile:hover {
+    transform: rotate(7deg);
+    transition: transform .5s;
+}
+.color-grey {
+    background-color: #CDCED0;
+}
+.color-blue {
+    background-color: #83ADF5;
+}
+.color-red {
+    background-color: #FC938D;
+}
+.color-yellow {
+    background-color: #FFD558;
+}
+.color-green {
+    background-color: #7AC491;
+}
+.color-pink {
+    background-color: #FE8BC6;
+}
+.color-purple {
+    background-color: #BF85F3;
+}
+.color-cyan {
+    background-color: #7FE3F3;
+}
+.color-orange {
+    background-color: #FEAE6F;
+}
+.tab-table-controls {
+    width: 100%;
+}
+.table-container {
+    padding: 10px;
+    max-height: 100%;
+    overflow: auto;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+}   
+th {
+    font-size: 14px;
+    background-color: #f5d0ac;
+}
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+    text-align: center;
+}
+.tab-icon {
+    width: 40px;
+    height: 40px;
+}
+tr:nth-child(odd) {
+ background-color: white;
+}
+tr:nth-child(even) {
+ background-color: #ede8e4;
+}

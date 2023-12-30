@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="../css/createnewgroup.css" />
+    <title>Document</title>
+</head>
+<body>
+    <div id="header">
+        <div class="logo-container">
+            <img class="icon" src="../icons/tabitha128.png">
+            <div class="logo-title">Tabitha</div>
+        </div>
+        <div class="page-title">Create New Group</div>
+    </div>
+    </div>
+    <div id="tab-table">
+        <div class="table-container">
+            <div id="index_native" class="box"></div>
+            <table id="table">
+                <tr>
+                  <th>Tab Icon</th>
+                  <th>Tab Title</th>
+                  <th>Url</th>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div id="control-panel">
+        <div class="color-grid">
+            <div class="color-grey color-tile"></div>
+            <div class="color-blue color-tile"></div>
+            <div class="color-red color-tile"></div>
+            <div class="color-yellow color-tile"></div>
+            <div class="color-green color-tile"></div>
+            <div class="color-pink color-tile"></div>
+            <div class="color-purple color-tile"></div>
+            <div class="color-cyan color-tile"></div>
+            <div class="color-orange color-tile"></div>
+        </div>
+        <input type="text" placeholder="Group Name">
+        <input type="text" placeholder="Group Alias">
+        <input type="checkbox" id="onOpenBehavior" value="True">
+        <label for="onOpenBehavior">Always open in new window<br>(Defaults to no)</label>    
+        <input type="checkbox" id="onOpenBehavior" value="True">
+        <label for="onOpenBehavior">Expand group on create<br>(Defaults to no)</label>    
+        <button id="create-group-button">Create</button>
+    </div>
+</body>
+<script src="../js/loadTabs.js"></script>
+<script src="../js/createGroup.js"></script>
+
+</html>

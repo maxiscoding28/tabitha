@@ -1,0 +1,88 @@
+    
+    * {
+            margin: 0;
+            padding: 0;
+    }
+    html,
+    body {
+        font-family: monospace;
+    }
+    .auto-margin {
+        margin: auto;
+    }
+    .full-width {
+        width: 100%;
+    }
+    .full-height {
+        height: 100%;
+    }
+    .flex {
+        display: flex;
+    }
+    .flex-center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .flex-column {
+        flex-direction: column;
+    }
+    .flex-grow {
+        flex-grow: 1;
+    }
+    .justify-center {
+        justify-content: center;
+    }
+    .justify-between {
+        justify-content: space-between;
+    }
+    .justify-around {
+        justify-content: space-around;
+    }
+    .justify-right {
+        justify-content: right;
+    }
+    .align-center {
+        align-items: center;
+    }
+    .text-center {
+        text-align: center;;
+    }
+    .scroll-div {
+        flex-direction: column;
+        overflow: scroll; 
+    }
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .list-item {
+        min-height: 35px;
+        border: .5px solid lightgray;
+        cursor: pointer;
+    }
+    .list-item:hover {
+        font-weight: bold;
+        text-decoration: underline;
+        box-shadow: 1px 1px #e8a973;
+    }
+    .rotate {
+        animation: rotation 7s infinite linear;
+    }
+    @keyframes rotation {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(359deg);
+        }
+    }
+    .page-title {
+        padding-right: 128px;
+        font-size: 2.75em;
+    }
+    .app-name {
+        font-size: 1.5em;
+    }
+    .logo {
+        padding: 5px;
+    }

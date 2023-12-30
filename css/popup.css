@@ -1,0 +1,61 @@
+html,
+body {
+    width: 430px;
+    max-width: 430px;
+    height: 410px;
+    max-height: 410px;
+}
+.popup-icon-container {
+    margin: 5px;
+}
+.popup-icon {
+    width: 30px;
+}
+.popup-app-name {
+    font-size: 1.5em;
+}
+.popup-header-items-margin {
+    margin: 5px;
+}
+.popup-header-controls {
+    padding: 2px 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: #e8a973;
+}
+.popup-header-controls:hover {
+    box-shadow: 1.5px 1.5px #ad713d;
+    cursor: pointer;
+}
+.cmd-input-container {
+    padding: 5px 0;
+}
+.cmd-input-container input[type="text"] {
+    padding-left: 30px;
+}
+.popup-cmd-text-input {
+    width: 95%;
+    height: 25px;
+    background-image: url('../icons/search.png');
+    background-size: 16px;
+    background-position: 2%;
+    background-repeat: no-repeat;
+    border: 1px solid #ad713d;
+}
+.popup-cmd-input:focus {
+    outline: none !important;
+}
+.popup-table-tab-groups {
+    border-top: 1px solid lightgray;
+    overflow: hidden;
+    padding: 4px;
+    background-color: #e8a973;
+}
+.popup-tab-groups-inner-div {
+    flex-basis: 40%;
+    border-right: 1px solid lightgray;
+    background-color: white;
+}
+.popup-table-tabs {
+    background-color: white;
+}
