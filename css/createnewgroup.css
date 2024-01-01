@@ -75,6 +75,11 @@ body {
 }
 .color-tile:hover {
     transform: rotate(7deg);
+    transition: top 1s;
+    top: -10px;
+}
+.color-tile:nth-of-type(even):hover {
+    transform: rotate(-7deg);
     transition: transform .5s;
     transition: top 1s;
     top: -10px;
