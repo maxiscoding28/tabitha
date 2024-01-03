@@ -1,3 +1,5 @@
+let color = "xx";
+
 function getElementById(id) {
     return document.getElementById(id)
 }
@@ -9,6 +11,7 @@ function selectColorTile(event) {
             }
         }
         event.target.classList.add("selected");
+        color = event.target.getAttribute("data-color")
     }
 }
 function validateNameInput() {
@@ -27,7 +30,7 @@ function getDefaultExpandBehaviorSetting(){
 }
 
 function formIsValidated() {
-    validateNameInput();
+    // validateNameInput();
 
     return true
     // if (validateNameInput() && validateAliasInput() ) {
@@ -52,7 +55,8 @@ function createGroupInChrome() {
             });   
             chrome.tabs.group({tabIds}, function(groupId) {
                 chrome.tabGroups.update(groupId, {
-                    color: "pink",
+                    collapsed: true,
+                    color: color,
                     title: name
                 }, function(){});
             })
