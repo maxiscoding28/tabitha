@@ -8,7 +8,6 @@ function isTabithaTab(url) {
   return url.startsWith(pattern)
 }
 function buildTableDataItem(icon, title, url){
-  console.log(icon)
   return `
   <tr>
     <td><img class="tab-icon" src="${icon ? icon : DEFAULT_ICON}"/></td>

@@ -78,6 +78,11 @@ body {
     transition: top 1s;
     top: -10px;
 }
+.color-tile.selected {
+    border: 4px solid white;
+    box-sizing: border-box;
+    padding: 4px;
+}
 .color-tile:nth-of-type(even):hover {
     transform: rotate(-7deg);
     transition: transform .5s;
