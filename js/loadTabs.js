@@ -11,8 +11,8 @@ function buildTableDataItem(icon, title, url){
   return `
   <tr>
     <td><img class="tab-icon" src="${icon ? icon : DEFAULT_ICON}"/></td>
-    <td>${title}</td>
-    <td>${url}</td>
+    <td class="cell-overflow">${title}</td>
+    <td class="cell-overflow">${url}</td>
   </tr>
   `
 }
