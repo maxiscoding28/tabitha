@@ -5,7 +5,7 @@
   "action": {
     "default_popup": "html/popup.html"
   },
-  "permissions": ["tabs", "tabGroups", "sidePanel"],
+  "permissions": ["tabs", "tabGroups", "sidePanel", "storage"],
   "background": {
     "service_worker": "js/service-worker.js"
   },

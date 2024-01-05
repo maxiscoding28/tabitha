@@ -148,6 +148,10 @@ function createTabGroup() {
                 color: addGroupSettings.color,
                 title: addGroupSettings.name
             }, (group) => {
+                let id = group.id
+                chrome.storage.local.set({id: group}).then(() => {
+                    debugger
+                })
                 // Get the groupID for all tabs
                 // Get the color associated with the groupID
                 // Get the title associated with the groupID
