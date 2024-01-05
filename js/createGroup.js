@@ -2,8 +2,6 @@ let color = "";
 let groupName = "";
 let selectedTabs = [];
 let onOpenBehavior = true;
-let existingGroupMembershipTabs = [];
-let noGroupMembershipTabs = [];
 
 function getElementById(id) {
     return document.getElementById(id)
@@ -81,6 +79,9 @@ function hasGroupMembership(groupId) {
 function formIsValidated() {
     return nameInputValidated() && tabSelected();
 }
+function sortTabsByGroupMembership(tabs) {
+    tabs.sort((a, b) => a.groupId - b.groupId);
+}
 function createGroupInChrome() {
     selectRandomColorIfNoColorSelected()
     getDefaultExpandBehaviorSetting()
@@ -97,13 +98,11 @@ function createGroupInChrome() {
                     tabs.forEach(function(tab) {
                         if (! isTabithaTab(tab.url)) {
                             if (hasGroupMembership(tab.groupId)) {
-                                existingGroupMembershipTabs.push(tab)
-                            }
-                            else {
-                                noGroupMembershipTabs.push(tab);
+                                chrome.tabGroups.get(tab.groupId, function(group){
+                                    tab.color = group.color
+                                })
                             }
 
-                            tabs.sort((a, b) => a.groupId - b.groupId);
                             renderTabsToTable(tabs)
                         }
                     })

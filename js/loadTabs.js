@@ -20,14 +20,16 @@ function buildTableDataItem(icon, title, url, tabId, groupId){
   `
 }
 function renderTabsToTable(tabs){
-  let tableBody = grabTableBody('table');
-  tableBody.innerHTML = "";
-  
-  tabs.forEach(function(tab){
-    if (! isTabithaTab(tab.url)) {
-      tableBody.innerHTML += buildTableDataItem(tab.favIconUrl, tab.title, tab.url, tab.id, tab.groupId);
-    }
+  sortTabsByGroupMembership(tabs)
+  tabs.forEach(tab => {
+    if (hasGroupMembership(tab.groupId)) {
+      debugger
+      chrome.tabGroups.get(tab.groupId, function(group){
+          tab.color = group.color
+      })
+  }
   })
+
 }
 function loadTabs() {
   chrome.tabs.query({}, renderTabsToTable);
