@@ -15,21 +15,22 @@ function removeClass(classList, className) {
 function addClass(classList, className) {
     classList.add(className)
 }
+function getAttribute(element, attribute) {
+    return element.getAttribute(attribute)
+}
 function selectColorTile(event) {
     if (classContains(event.target.classList, "color-tile")) {
         let colorGrid = event.target.parentElement.children;
-        console.log(colorGrid)
         for (tile of colorGrid) {
-            console.log(tile)
             if (classContains(tile.classList, "selected")) {
                 removeClass(tile.classList, "selected")
             }
         }
         addClass(event.target.classList, "selected");
-        color = event.target.getAttribute("data-color")
+        color = getAttribute(event.target, "data-color")
     }
 }
-function colorSelected() {
+function selectRandomColorIfNoColorSelected() {
     if (color.length < 1) {
         let colors = ["grey", "blue", "red", "yellow", "green", "pink", "purple", "cyan", "oragne"]
         let randomIndex = Math.floor(Math.random() * colors.length);
@@ -49,12 +50,16 @@ function nameInputValidated() {
 }
 function tabSelected() {
     let tabs = document.querySelectorAll('[data-tab-id]');
+    if (tabs.length < 1) {
+        alert("Please select the tabs you would like grouped.")
+        return false
+    }
     tabs.forEach(tab => {
         if (tab.checked) {
-            selectedTabs.push(parseInt(tab.getAttribute("data-tab-id")));
+            let tabId = getAttribute(tab, "data-tab-id")
+            selectedTabs.push(parseInt(tabId));
         }
     })
-
     return true
 }
 function aliasInputValidated() {
@@ -67,20 +72,17 @@ function aliasInputValidated() {
     return true;
 }
 function getDefaultExpandBehaviorSetting(){
-    onOpenBehavior= document.getElementById("onOpenBehavior").checked;
-    return true
+    onOpenBehavior= getElementById("onOpenBehavior").checked;
 }
 
 function formIsValidated() {
-    return (
-        colorSelected() &&
-        nameInputValidated() &&
-        tabSelected() &&
-        getDefaultExpandBehaviorSetting()
-    );
+    return nameInputValidated() && tabSelected();
 }
 
 function createGroupInChrome() {
+    selectRandomColorIfNoColorSelected()
+    getDefaultExpandBehaviorSetting()
+    
     if (formIsValidated()) {
         chrome.tabs.group({tabIds: selectedTabs}, function(groupId) {
             chrome.tabGroups.update(groupId, {
