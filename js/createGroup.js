@@ -6,14 +6,24 @@ let onOpenBehavior = true;
 function getElementById(id) {
     return document.getElementById(id)
 }
+function classContains(classList, className) {
+    return classList.contains(className)
+}
+function removeClass(classList, className) {
+    classList.remove(className)
+}
+function addClass(classList, className) {
+    classList.add(className)
+}
 function selectColorTile(event) {
-    if (event.target.classList.contains("color-tile")) {
-        for (tileElement of event.target.parentElement.children) {
-            if (tileElement.classList.contains("selected")) {
-                tileElement.classList.remove("selected")
+    if (classContains(event.target.classList, "color-tile")) {
+        let colorGrid = event.target.parentElement.children;
+        for (tile of colorGrid) {
+            if (classContains(tile.classlist, "selected")) {
+                tile.classList.remove(tile.classList, "selected")
             }
         }
-        event.target.classList.add("selected");
+        event.target.classList.addClass(event.target.classList, "selected");
         color = event.target.getAttribute("data-color")
     }
 }
@@ -32,7 +42,6 @@ function nameInputValidated() {
         alert("Name is required");
         return false
     }
-    debugger
     groupName = input
     return true
 }
@@ -78,8 +87,10 @@ function createGroupInChrome() {
                 color: color,
                 title: groupName
             }, function(){
-                // filter out groupedTabs
-                // reset form
+                // add group color to tab elements that are grouped
+                // Place at bottom of the table
+                // Select All Non Grouped Tabs by Default
+                // If group create and non group tabs are selected, popup dialog to either move to new group or duplicate
             });
         })
     }

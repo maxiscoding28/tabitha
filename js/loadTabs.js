@@ -10,7 +10,8 @@ function isTabithaTab(url) {
 function buildTableDataItem(icon, title, url, tabId){
   return `
   <tr>
-    <td><input type="checkbox" checked data-tab-id="${tabId}" /></td>
+    <td style="max-width: 10px"><input type="checkbox" checked data-tab-id="${tabId}" /></td>
+    <td>GroupName</td>
     <td><img class="tab-icon" src="${icon ? icon : DEFAULT_ICON}"/></td>
     <td class="cell-overflow">${title}</td>
     <td class="cell-overflow">${url}</td>
