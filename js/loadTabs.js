@@ -7,9 +7,10 @@ function isTabithaTab(url) {
   let pattern = `chrome-extension://${chrome.runtime.id}`;
   return url.startsWith(pattern)
 }
-function buildTableDataItem(icon, title, url){
+function buildTableDataItem(icon, title, url, tabId){
   return `
   <tr>
+    <td><input type="checkbox" checked data-tab-id="${tabId}" /></td>
     <td><img class="tab-icon" src="${icon ? icon : DEFAULT_ICON}"/></td>
     <td class="cell-overflow">${title}</td>
     <td class="cell-overflow">${url}</td>
@@ -21,7 +22,7 @@ function renderTabsToTable(tabs){
   
   tabs.forEach(function(tab){
     if (! isTabithaTab(tab.url)) {
-      tableBody.innerHTML += buildTableDataItem(tab.favIconUrl, tab.title, tab.url);
+      tableBody.innerHTML += buildTableDataItem(tab.favIconUrl, tab.title, tab.url, tab.id);
     }
   })
 }

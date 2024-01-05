@@ -1,4 +1,7 @@
-let color = "xx";
+let color = "";
+let groupName = "";
+let selectedTabs = [];
+let onOpenBehavior = true;
 
 function getElementById(id) {
     return document.getElementById(id)
@@ -14,53 +17,71 @@ function selectColorTile(event) {
         color = event.target.getAttribute("data-color")
     }
 }
-function validateNameInput() {
-    input = getElementById("name").value
+function colorSelected() {
+    if (color.length < 1) {
+        let colors = ["grey", "blue", "red", "yellow", "green", "pink", "purple", "cyan", "oragne"]
+        let randomIndex = Math.floor(Math.random() * colors.length);
+        color = colors[randomIndex];
+    }
+
+    return true
+}
+function nameInputValidated() {
+    let input = getElementById("name").value
     if (input.length < 1) {
         alert("Name is required");
+        return false
     }
-    // Check if Name is added, meets critera maximum 20 characters
-
+    debugger
+    groupName = input
+    return true
 }
-function validateAliasInput() {
-    // Check if Alias is added, maximum of 5 characters, no spaces all plaintext (no emojis or special characters)
+function tabSelected() {
+    let tabs = document.querySelectorAll('[data-tab-id]');
+    tabs.forEach(tab => {
+        if (tab.checked) {
+            selectedTabs.push(parseInt(tab.getAttribute("data-tab-id")));
+        }
+    })
+
+    return true
+}
+function aliasInputValidated() {
+    let input = getElementById("alias")
+    if (input.length < 1) {
+        alias = groupName;
+    }
+    aliasName = input.value
+
+    return true;
 }
 function getDefaultExpandBehaviorSetting(){
-        // Check if Box is checked or not
+    onOpenBehavior= document.getElementById("onOpenBehavior").checked;
+    return true
 }
 
 function formIsValidated() {
-    // validateNameInput();
-
-    return true
-    // if (validateNameInput() && validateAliasInput() ) {
-    //     let settings = {
-    //         title: getTitle(),
-    //         alias: getAlias(),
-    //         defaultExpandSetting: getDefaultExpandBehaviorSetting()
-    //     }
-    //     createGroupInChrome(settings)
-    // }
+    return (
+        colorSelected() &&
+        nameInputValidated() &&
+        tabSelected() &&
+        getDefaultExpandBehaviorSetting()
+    );
 }
 
 function createGroupInChrome() {
     if (formIsValidated()) {
-        let name = getElementById("name").value
-        chrome.tabs.query({}, function(tabs){
-            let tabIds = [];
-            tabs.forEach(function(tab) {
-                if (! isTabithaTab(tab.url)) {
-                    tabIds.push(tab.id)
-                } 
-            });   
-            chrome.tabs.group({tabIds}, function(groupId) {
-                chrome.tabGroups.update(groupId, {
-                    collapsed: true,
-                    color: color,
-                    title: name
-                }, function(){});
-            })
-        });
+        chrome.tabs.group({tabIds: selectedTabs}, function(groupId) {
+            debugger
+            chrome.tabGroups.update(groupId, {
+                collapsed: ! onOpenBehavior,
+                color: color,
+                title: groupName
+            }, function(){
+                // filter out groupedTabs
+                // reset form
+            });
+        })
     }
 }
 

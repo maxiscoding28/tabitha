@@ -13,13 +13,20 @@
             <div class="logo-title">Tabitha</div>
         </div>
         <div class="page-title">Create New Group</div>
+        <div id="table-controls">
+            <div>Select All</div>
+            <input type="checkbox" />
+            <button>Grouped Tabs</button>
+        </div>
     </div>
+
     </div>
     <div id="tab-table">
         <div class="table-container">
             <div id="index_native" class="box"></div>
             <table id="table">
                 <tr>
+                  <th>Include?</th>
                   <th>Tab Icon</th>
                   <th>Tab Title</th>
                   <th>Tab Url
@@ -38,7 +45,7 @@
             <div data-color="purple" class="color-purple color-tile"></div>
             <div data-color="cyan" class="color-cyan color-tile"></div>
             <div data-color="orange" class="color-orange color-tile"></div>
-            <div data-color="RANDOM" class="color-tile color-random">?</div>
+            <div data-color="RANDOM" class="color-tile color-random selected">?</div>
         </div>
         <input type="text" placeholder="Group Name (required)" id="name">
         <input type="text" placeholder="Group Alias (Optional)" id="alias">  
