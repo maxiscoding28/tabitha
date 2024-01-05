@@ -2,6 +2,8 @@ let color = "";
 let groupName = "";
 let selectedTabs = [];
 let onOpenBehavior = true;
+let existingGroupMembershipTabs = [];
+let noGroupMembershipTabs = [];
 
 function getElementById(id) {
     return document.getElementById(id)
@@ -32,11 +34,10 @@ function selectColorTile(event) {
 }
 function selectRandomColorIfNoColorSelected() {
     if (color.length < 1) {
-        let colors = ["grey", "blue", "red", "yellow", "green", "pink", "purple", "cyan", "oragne"]
+        let colors = ["grey", "blue", "red", "yellow", "green", "pink", "purple", "cyan", "orange"]
         let randomIndex = Math.floor(Math.random() * colors.length);
         color = colors[randomIndex];
     }
-
     return true
 }
 function nameInputValidated() {
@@ -74,11 +75,12 @@ function aliasInputValidated() {
 function getDefaultExpandBehaviorSetting(){
     onOpenBehavior= getElementById("onOpenBehavior").checked;
 }
-
+function hasGroupMembership(groupId) {
+    return groupId >= 0;
+}
 function formIsValidated() {
     return nameInputValidated() && tabSelected();
 }
-
 function createGroupInChrome() {
     selectRandomColorIfNoColorSelected()
     getDefaultExpandBehaviorSetting()
@@ -90,6 +92,23 @@ function createGroupInChrome() {
                 color: color,
                 title: groupName
             }, function(){
+                // get all grouped tabs
+                chrome.tabs.query({}, function(tabs){
+                    tabs.forEach(function(tab) {
+                        if (! isTabithaTab(tab.url)) {
+                            if (hasGroupMembership(tab.groupId)) {
+                                existingGroupMembershipTabs.push(tab)
+                            }
+                            else {
+                                noGroupMembershipTabs.push(tab);
+                            }
+
+                            tabs.sort((a, b) => a.groupId - b.groupId);
+                            renderTabsToTable(tabs)
+                        }
+                    })
+                });
+
                 // add group color to tab elements that are grouped
                 // Place at bottom of the table
                 // Select All Non Grouped Tabs by Default
