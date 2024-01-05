@@ -18,12 +18,14 @@ function addClass(classList, className) {
 function selectColorTile(event) {
     if (classContains(event.target.classList, "color-tile")) {
         let colorGrid = event.target.parentElement.children;
+        console.log(colorGrid)
         for (tile of colorGrid) {
-            if (classContains(tile.classlist, "selected")) {
-                tile.classList.remove(tile.classList, "selected")
+            console.log(tile)
+            if (classContains(tile.classList, "selected")) {
+                removeClass(tile.classList, "selected")
             }
         }
-        event.target.classList.addClass(event.target.classList, "selected");
+        addClass(event.target.classList, "selected");
         color = event.target.getAttribute("data-color")
     }
 }
@@ -81,7 +83,6 @@ function formIsValidated() {
 function createGroupInChrome() {
     if (formIsValidated()) {
         chrome.tabs.group({tabIds: selectedTabs}, function(groupId) {
-            debugger
             chrome.tabGroups.update(groupId, {
                 collapsed: ! onOpenBehavior,
                 color: color,
