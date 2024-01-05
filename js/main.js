@@ -148,15 +148,23 @@ function createTabGroup() {
                 color: addGroupSettings.color,
                 title: addGroupSettings.name
             }, (group) => {
-                let id = group.id
-                chrome.storage.local.set({id: group}).then(() => {
-                    debugger
+                let data = {};
+                let id = group.id.toString()
+                data[id] = group;
+                chrome.storage.session.set(data).then( () => {
+                    chrome.storage.session.get(null, function(items) {
+                    for (key in items) {
+                        console.log(key, items);
+                    }
+                    });
                 })
+
+
+                
                 // Get the groupID for all tabs
                 // Get the color associated with the groupID
                 // Get the title associated with the groupID
                 // Rerender the table with the color and titles
-                debugger
             });
         })
     }
