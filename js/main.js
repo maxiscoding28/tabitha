@@ -28,6 +28,7 @@ function buildTableDataItem(icon, title, url, tabId, groupId){
   `
 }
 function renderTabsToTable() {
+    // chrome.storage.session.get(groups)
     const tableBody = getTableBody("table")
     tableBody.innerHTML = "";
     chrome.tabs.query({}, tabs => {
@@ -35,7 +36,17 @@ function renderTabsToTable() {
         sortTabsByGroupMembership(tabs)
         tabs.forEach(tab => {
             if (! isTabithaTab(tab.url)) {
-                tableBody.innerHTML += buildTableDataItem(tab.favIconUrl, tab.title, tab.url, tab.id, tab.groupId)
+                // If tab.groupId > -1
+                    // tab.groupColor =  group[tab.groupId].color
+                    // tab.groupName = group[tab.groupId].title
+                tableBody.innerHTML += buildTableDataItem(
+                    tab.favIconUrl, 
+                    tab.title, 
+                    tab.url, 
+                    tab.id, 
+                    tab.groupId, 
+                    tab.color
+                )
             }       
         })
     });
@@ -153,9 +164,9 @@ function createTabGroup() {
                 data[id] = group;
                 chrome.storage.session.set(data).then( () => {
                     chrome.storage.session.get(null, function(items) {
-                    for (key in items) {
-                        console.log(key, items);
-                    }
+                        for (key in items) {
+                            console.log(key, items);
+                        }
                     });
                 })
 
