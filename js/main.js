@@ -28,7 +28,9 @@ function buildTableDataItem(icon, title, url, tabId, groupId){
   `
 }
 function renderTabsToTable() {
-    // chrome.storage.session.get(groups)
+    debugger
+    // chrome.storage.session.get().then((result) => console.log(result))
+    // chrome.storage.session.get(["169612041"]).then((result) => console.log(result))
     const tableBody = getTableBody("table")
     tableBody.innerHTML = "";
     chrome.tabs.query({}, tabs => {
@@ -170,6 +172,9 @@ function createTabGroup() {
                     });
                 })
 
+                // example object
+                let object = {groups: {"id": {}}}
+                renderTabsToTable()
 
                 
                 // Get the groupID for all tabs
