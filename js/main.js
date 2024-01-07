@@ -1,27 +1,22 @@
-// DOM Manager
-// In charge of all gets and set on the DOM
-
-// Color Tile
-// In Charge of Color Tile Items
-
-// Logic
-// Logic function for behavior
-
-// FormManager
-// Validating data, storing data
-
-
-
-// Global Variables
 const DEFAULT_ICON = "../icons/tabitha48.png"
+const CHROME_EXTENSION_URL=`chrome-extension://${chrome.runtime.id}`;
 const addGroupSettings = {
     color: "",
     selectedTabs: [],
     alias: "",
     onOpenBehavior: false
 }
-
-// DOM Manipulation Helper Functions
+const colorMapping = {
+    grey: "#CDCED0",
+    blue: "#83ADF5",
+    red: "#FC938D",
+    yellow: "#FFD558",
+    green: "#7AC491",
+    pink: "#FE8BC6",
+    purple: "#BF85F3",
+    cyan: "#7FE3F3",
+    orange: "#FEAE6F"
+}
 function getTableBody(domId) {
    return document.getElementById(domId).getElementsByTagName('tbody')[0]
 }
@@ -41,15 +36,18 @@ function getAttribute(element, attribute) {
     return element.getAttribute(attribute)
 }
 function getTabIdInteger(tabCheckbox) {
-    return parseInt(tabCheckbox.getAttribute("data-tab-id"));
+    return parseInt(getAttribute(tabCheckbox, "data-tab-id"));
+}
+function aliasIsNotSet() {
+    return getElementById("alias").length < 1
 }
 function setAlias() {
-    if (getElementById("alias").length < 1) {
+    if (aliasIsNotSet()) {
         addGroupSettings.alias = addGroupSettings.name
     }
 }
-function resetColorGrid() {
-    const colorGrid = event.target.parentElement.children;
+function resetColorGrid(target) {
+    const colorGrid = target.parentElement.children;
     for (tile of colorGrid) {
         if (classContains(tile.classList, "selected")) {
             removeClass(tile.classList, "selected")
@@ -57,19 +55,16 @@ function resetColorGrid() {
     }
 }
 function setOnOpenBehavior(){
-    addGroupSettings.onOpenBehavior= getElementById("onOpenBehavior").checked;
+    addGroupSettings.onOpenBehavior = getElementById("onOpenBehavior").checked;
 }
-
-// Form Validation Logic
 function isTabithaTab(url) {
-    const pattern = `chrome-extension://${chrome.runtime.id}`;
-    return url.startsWith(pattern)
+    return url.startsWith(CHROME_EXTENSION_URL)
   }
 function hasGroupMembership(groupId) {
     return groupId >= 0;
 }
 function formIsValidated() {
-    return nameMeetsRequirements() && tabSelected();
+    return nameMeetsRequirements() && tabsSelected();
 }
 function sortTabsByGroupMembership(tabs) {
     tabs.sort((a, b) => a.groupId - b.groupId);
@@ -77,7 +72,7 @@ function sortTabsByGroupMembership(tabs) {
 function selectColorTile(event) {
     const targetClassList = event.target.classList;
     
-    resetColorGrid()
+    resetColorGrid(event.target)
     
     if (classContains(targetClassList, "color-tile")) {
         addClass(targetClassList, "selected");
@@ -86,11 +81,10 @@ function selectColorTile(event) {
 }
 function setColorTile() {
     if (addGroupSettings.color.length < 1) {
-        let colors = ["grey", "blue", "red", "yellow", "green", "pink", "purple", "cyan", "orange"]
-        let randomIndex = Math.floor(Math.random() * colors.length);
+        const colors = Object.keys(colorMapping);
+        let randomIndex = Math.floor(Math.random() * color.length);
         addGroupSettings.color = colors[randomIndex];
     }
-    return true
 }
 function nameMeetsRequirements() {
     let input = getElementById("name").value
@@ -102,14 +96,16 @@ function nameMeetsRequirements() {
         alert("Group name can't be more than 15 characters")
         return false;
     }
-    addGroupSettings.name = input;
     return true
 }
-function tabSelected() {
-    let selectedTabCount = 0;
+function setName() {
+    addGroupSettings.name = input;
+}
+function tabsSelected() {
+    const selectedTabCount = 0;
     const [...tabCheckboxes] = document.querySelectorAll('[data-tab-id]');
     tabCheckboxes.forEach(tabCheckbox => {
-        let tabIdInteger = getTabIdInteger(tabCheckbox)
+        const tabIdInteger = getTabIdInteger(tabCheckbox)
         if (tabCheckbox.checked) {
             selectedTabCount += 1;
             addGroupSettings.selectedTabs.push(tabIdInteger);
@@ -139,14 +135,16 @@ function saveGroupToStorage(group) {
     const message = {};
     const id = group.id.toString()
     message[id] = group;
-    chrome.storage.session.set(message).then( () => {
-        renderTabsToTable()
-    })
+    chrome.storage.session.set(message).then( () => renderTabsToTable());
 }
 
 function buildTableDataItem(icon, title, url, tabId, groupName, color){
-  const groupDecoration = !! groupName ? "group" : "no-group";
-  const defaultGroupedTabsUnchecked = groupName ? "" : "checked";
+    const groupDecoration = "no-group";
+    const defaultGroupedTabsUnchecked = "checked";
+    if (!! groupName) {
+        groupDecoration = "group";
+        defaultGroupedTabsUnchecked = "checked";
+    }
   return `
     <tr class="${groupDecoration}" style="background-color:${color};">
         <td class="small-col"><input type="checkbox" ${defaultGroupedTabsUnchecked} data-tab-id="${tabId}" /></td>
@@ -174,7 +172,7 @@ function renderTabsToTable() {
         tabs.forEach(tab => {
             if (! isTabithaTab(tab.url)) {
                 if (tab.groupId > -1) {
-                    tab.color = groups[tab.groupId.toString()].color
+                    tab.color = colorMapping[groups[tab.groupId.toString()].color]
                     tab.groupName = groups[tab.groupId.toString()].title
                 }
                 tableBody.innerHTML += buildTableDataItem(
@@ -204,6 +202,7 @@ function loadExistingGroupsToStorage() {
 function createTabGroup() {
     if (formIsValidated()) {
         setColorTile();
+        setName();
         setAlias();
         setOnOpenBehavior()
         groupTabs();
@@ -216,10 +215,10 @@ function addEventHandlers() {
     colorGrid.addEventListener('click', selectColorTile)
     createGroupButton.addEventListener('click', createTabGroup)
 }
+
 function initPage() {
     loadExistingGroupsToStorage();
     document.addEventListener('DOMContentLoaded', addEventHandlers);
     document.addEventListener('DOMContentLoaded', renderTabsToTable);
 }
-
 initPage();
