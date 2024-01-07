@@ -141,9 +141,6 @@ th {
     font-size: 14px;
     background-color: #f5d0ac;
 }
-tr.group {
-    background: red !important;
-}
 td, th {
     border: 1px solid #dddddd;
     text-align: left;

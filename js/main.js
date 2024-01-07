@@ -5,61 +5,84 @@ const addGroupSettings = {
     alias: "",
     onOpenBehavior: false
 }
-const groupIdToColorNameMapping = {
-
-}
 function getTableBody(domId) {
    return document.getElementById(domId).getElementsByTagName('tbody')[0]
+}
+function groupTabs() {
+    chrome.tabs.group({tabIds: addGroupSettings.selectedTabs}, (groupId) => {
+        chrome.tabGroups.update(groupId, {
+            collapsed: ! addGroupSettings.onOpenBehavior,
+            color: addGroupSettings.color,
+            title: addGroupSettings.name
+        }, saveGroupToStorage(group));
+    })
+}
+function saveGroupToStorage(group) {
+    const message = {};
+    const id = group.id.toString()
+    message[id] = group;
+    chrome.storage.session.set(message).then( () => {
+        renderTabsToTable()
+    })
 }
 function isTabithaTab(url) {
   const pattern = `chrome-extension://${chrome.runtime.id}`;
   return url.startsWith(pattern)
 }
-function buildTableDataItem(icon, title, url, tabId, groupId){
-  const groupDecoration = groupId > 0 ? "group" : "no-group";
+function buildTableDataItem(icon, title, url, tabId, groupName, color){
+  const groupDecoration = !! groupName ? "group" : "no-group";
   return `
-  <tr class="${groupDecoration}">
-    <td class="small-col"><input type="checkbox" checked data-tab-id="${tabId}" /></td>
-    <td class="small-col">GroupName</td>
-    <td><img class="tab-icon" src="${icon ? icon : DEFAULT_ICON}"/></td>
-    <td class="cell-overflow">${title}</td>
-    <td class="cell-overflow">${url}</td>
-  </tr>
+    <tr class="${groupDecoration}" style="background-color:${color};">
+        <td class="small-col"><input type="checkbox" checked data-tab-id="${tabId}" /></td>
+        <td class="small-col">${!! groupName ? groupName : ""}</td>
+        <td><img class="tab-icon" src="${icon ? icon : DEFAULT_ICON}"/></td>
+        <td class="cell-overflow">${title}</td>
+        <td class="cell-overflow">${url}</td>
+        <td class="cell-overflow">${color}</td>
+    </tr>
   `
 }
 function renderTabsToTable() {
-    debugger
-    // chrome.storage.session.get().then((result) => console.log(result))
-    // chrome.storage.session.get(["169612041"]).then((result) => console.log(result))
-    const tableBody = getTableBody("table")
-    tableBody.innerHTML = "";
-    chrome.tabs.query({}, tabs => {
-        // Need Tab's Group ID and Color For Group
+    chrome.storage.session.get().then( groups => {
+        const tableBody = getTableBody("table")
+        tableBody.innerHTML = `
+        <tr>
+            <th class="small-col">Include?</th>
+            <th class="small-col">Group?</th>
+            <th>Tab Icon</th>
+            <th>Tab Title</th>
+            <th>Tab Url</th>
+        </tr>
+        `;
+        chrome.tabs.query({}, tabs => {
         sortTabsByGroupMembership(tabs)
         tabs.forEach(tab => {
             if (! isTabithaTab(tab.url)) {
-                // If tab.groupId > -1
-                    // tab.groupColor =  group[tab.groupId].color
-                    // tab.groupName = group[tab.groupId].title
+                if (tab.groupId > -1) {
+                    tab.color = groups[tab.groupId.toString()].color
+                    tab.groupName = groups[tab.groupId.toString()].title
+                }
                 tableBody.innerHTML += buildTableDataItem(
                     tab.favIconUrl, 
                     tab.title, 
                     tab.url, 
                     tab.id, 
-                    tab.groupId, 
+                    tab.groupName, 
                     tab.color
                 )
             }       
-        })
-    });
+        })});    
+    })
 }
-function buildGroupIdToColorNameMapping() {
+function loadExistingGroupsToStorage() {
     chrome.tabGroups.query({}, (groups) => {
         groups.forEach(group => {
-            groupIdToColorNameMapping[group.id] = {
-                name: group.title,
-                color: group.color
-            };
+            let data = {};
+            let id = group.id.toString()
+            data[id] = group;
+            chrome.storage.session.set(data).then( () => {
+                console.log("Group created")
+            })
         })
     })
 }
@@ -155,34 +178,7 @@ function createTabGroup() {
         setColorTile();
         setAlias();
         setOnOpenBehavior()
-        chrome.tabs.group({tabIds: addGroupSettings.selectedTabs}, (groupId) => {
-            chrome.tabGroups.update(groupId, {
-                collapsed: ! addGroupSettings.onOpenBehavior,
-                color: addGroupSettings.color,
-                title: addGroupSettings.name
-            }, (group) => {
-                let data = {};
-                let id = group.id.toString()
-                data[id] = group;
-                chrome.storage.session.set(data).then( () => {
-                    chrome.storage.session.get(null, function(items) {
-                        for (key in items) {
-                            console.log(key, items);
-                        }
-                    });
-                })
-
-                // example object
-                let object = {groups: {"id": {}}}
-                renderTabsToTable()
-
-                
-                // Get the groupID for all tabs
-                // Get the color associated with the groupID
-                // Get the title associated with the groupID
-                // Rerender the table with the color and titles
-            });
-        })
+        groupTabs();
     }
 }
 
@@ -194,7 +190,7 @@ function addEventHandlers() {
     createGroupButton.addEventListener('click', createTabGroup)
 }
 function initPage() {
-    buildGroupIdToColorNameMapping();
+    loadExistingGroupsToStorage();
     document.addEventListener('DOMContentLoaded', addEventHandlers);
     document.addEventListener('DOMContentLoaded', renderTabsToTable);
 }
