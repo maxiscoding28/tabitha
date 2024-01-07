@@ -1,3 +1,17 @@
+// DOM Manager
+// In charge of all gets and set on the DOM
+
+// Color Tile
+// In Charge of Color Tile Items
+
+// Logic
+// Logic function for behavior
+
+// FormManager
+// Validating data, storing data
+
+
+
 // Global Variables
 const DEFAULT_ICON = "../icons/tabitha48.png"
 const addGroupSettings = {
