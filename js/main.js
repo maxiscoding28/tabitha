@@ -99,10 +99,10 @@ function nameMeetsRequirements() {
     return true
 }
 function setName() {
-    addGroupSettings.name = input;
+    addGroupSettings.name = getElementById("name").input;
 }
 function tabsSelected() {
-    const selectedTabCount = 0;
+    let selectedTabCount = 0;
     const [...tabCheckboxes] = document.querySelectorAll('[data-tab-id]');
     tabCheckboxes.forEach(tabCheckbox => {
         const tabIdInteger = getTabIdInteger(tabCheckbox)
@@ -139,14 +139,14 @@ function saveGroupToStorage(group) {
 }
 
 function buildTableDataItem(icon, title, url, tabId, groupName, color){
-    const groupDecoration = "no-group";
-    const defaultGroupedTabsUnchecked = "checked";
-    if (!! groupName) {
+    let defaultGroupedTabsUnchecked = "checked";
+    console.log(groupName)
+    if (groupName > -1) {
         groupDecoration = "group";
-        defaultGroupedTabsUnchecked = "checked";
+        defaultGroupedTabsUnchecked = "unchecked"
     }
   return `
-    <tr class="${groupDecoration}" style="background-color:${color};">
+    <tr class="" style="background-color:${color};">
         <td class="small-col"><input type="checkbox" ${defaultGroupedTabsUnchecked} data-tab-id="${tabId}" /></td>
         <td class="small-col">${!! groupName ? groupName : ""}</td>
         <td><img class="tab-icon" src="${icon ? icon : DEFAULT_ICON}"/></td>
@@ -171,7 +171,7 @@ function renderTabsToTable() {
         sortTabsByGroupMembership(tabs)
         tabs.forEach(tab => {
             if (! isTabithaTab(tab.url)) {
-                if (tab.groupId > -1) {
+                if (hasGroupMembership(tab.groupId)) {
                     tab.color = colorMapping[groups[tab.groupId.toString()].color]
                     tab.groupName = groups[tab.groupId.toString()].title
                 }
