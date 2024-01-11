@@ -1,4 +1,5 @@
-const colorMapping = {
+const DEFAULT_ICON = "../icons/tabitha48.png"
+const COLOR_MAPPING = {
     grey: "#CDCED0",
     blue: "#83ADF5",
     red: "#FC938D",
@@ -13,90 +14,93 @@ let storedTabGroups = {};
 
 // Check if Groups Exists In Storage
 chrome.storage.session.get().then( groups => {
+
+    // Save to object on client side
     storedTabGroups = groups;
+
+    // Retrieve all chrome tab groups
     chrome.tabGroups.query({}, (chromeTabGroups) => {
         chromeTabGroups.forEach(chromeTabGroup => {
-            if (! chromeTabGroup.id in storedTabGroups) {
+
+            // If chrome tab group doesn't exist in storedTabGroups, create it.
+            if (!(chromeTabGroup.id in storedTabGroups)) {
                 storedTabGroups[chromeTabGroup.id] = chromeTabGroup;   
             }
         })
+
+        // Load Tabs with Group Decorations
         loadActiveTabsInTable();
     })
 })
-// chrome.storage.session.get().then( storageGroups => {
-//     chrome.tabGroups.query({}, (chromeTabGroups) => {
-//         debugger
-//         chromeTabGroups.forEach(chromeTabGroup => {
-//             debugger
-//             // if chromeTabGroup.id does not exist in Object.keys(storage)
-//                 // save to storage
-//         });
-//     });
-// })
 
-
-    // If so load them
-
-// Add event handler for creating a group
-
-// Load all open tabs
-
-// Validate form input
-
-// Create group
-    // Save in storage
-
-// Reload tabs
-
-// Storage Functions
-function setGroupInStorage(group) {
-    let message = {};
-    message[group.id.toString()] = group;
-    chrome.storage.session.set(message).then( () => {
-        console.log("Group created")
-    })
-}
 function loadActiveTabsInTable() {
-    chrome.storage.session.get().then( groups => {
-        const tableBody = document.getElementById("table").getElementsByTagName('tbody')[0];
-        tableBody.innerHTML = `
-            <tr>
-                <th class="small-col">Include?</th>
-                <th class="small-col">Group?</th>
-                <th>Tab Icon</th>
-                <th>Tab Title</th>
-                <th>Tab Url</th>
-            </tr>`;
-            chrome.tabs.query({}, tabs => {
-                if (url.startsWith(`chrome-extension://${chrome.runtime.id}`)) {
-                    // if (tab.groupId > -1) {
-                    //     tab.color = colorMapping[groups[tab.groupId.toString()].color]
-                    //     tab.groupName = groups[tab.groupId.toString()].title
-                    // }
-                    tableBody.innerHTML += buildTableDataItem(
-                        tab.favIconUrl, 
-                        tab.title, 
-                        tab.url, 
-                        tab.id, 
-                        tab.groupId
-                    )
+
+    // Grab table body
+    const tableBody = document.getElementById("table").getElementsByTagName('tbody')[0];
+    
+    // Add headers
+    tableBody.innerHTML = `
+        <tr>
+            <th class="small-col">Include?</th>
+            <th class="small-col">Group?</th>
+            <th>Tab Icon</th>
+            <th>Tab Title</th>
+            <th>Tab Url</th>
+        </tr>`;
+
+    // Grab all active tabs
+    chrome.tabs.query({}, tabs => {
+        tabs.forEach(tab => {
+
+            // Filter out tabby urls
+            if (! tab.url.startsWith(`chrome-extension://${chrome.runtime.id}`)) {
+
+                // Check if tab is member of group
+                // If so, lookup color and name
+                if (tab.groupId > -1) {
+                    tab.groupColor = COLOR_MAPPING[storedTabGroups[tab.groupId.toString()].color]
+                    tab.groupName = storedTabGroups[tab.groupId.toString()].title
                 }
-            });
-    });
+
+                // Build the HTML for the tab
+                tableBody.innerHTML += buildTableDataItem(
+                    tab.favIconUrl, 
+                    tab.title, 
+                    tab.url, 
+                    tab.id,
+                    tab.groupColor,
+                    tab.groupName
+                )
+            }
+        })
+
+        });
 }
-function buildTableDataItem(icon, title, url, tabId, groupId){
+function buildTableDataItem(icon, title, url, tabId, groupColor, groupName){
+
+    // Uncheck already grouped tabs by default
     let noGroupMembership = "checked";
-    if (groupId > -1) {
-        groupName
+    if (groupColor) {
         noGroupMembership = "unchecked"
     }
-  return `
-    <tr class="" style="background-color:${color};">
-        <td class="small-col"><input type="checkbox" ${noGroupMembership} data-tab-id="${tabId}" /></td>
-        <td class="small-col">${!! groupName ? groupName : ""}</td>
-        <td><img class="tab-icon" src="${icon ? icon : DEFAULT_ICON}"/></td>
-        <td class="cell-overflow">${title}</td>
-        <td class="cell-overflow">${url}</td>
-    </tr>
-  `
+    return `
+        <tr class="" style="background-color:${groupColor};">
+            <td class="small-col"><input type="checkbox" ${noGroupMembership} data-tab-id="${tabId}" /></td>
+            <td class="small-col">${!! groupName ? groupName : ""}</td>
+            <td><img class="tab-icon" src="${icon ? icon : DEFAULT_ICON}"/></td>
+            <td class="cell-overflow">${title}</td>
+            <td class="cell-overflow">${url}</td>
+        </tr>
+    `
 }
+
+
+// Add document listener for click Create/
+// Check if name is given if not send empty string
+// Check if alias is given, if not check if name is given. If so set name, otherwise set empty string
+// Check if color is set, if not pick random color
+// Expand group on create check if it is set
+
+
+// Add to object
+// Save full object to groups
