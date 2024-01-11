@@ -180,8 +180,7 @@ function renderTabsToTable() {
                     tab.title, 
                     tab.url, 
                     tab.id, 
-                    tab.groupName, 
-                    tab.color
+                    tab.groupId
                 )
             }       
         })});    
