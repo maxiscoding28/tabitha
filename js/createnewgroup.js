@@ -12,9 +12,7 @@ const COLOR_MAPPING = {
 }
 let storedTabGroups = {};
 
-// Check if Groups Exists In Storage
-chrome.storage.session.get().then( groups => {
-
+function mergeTabGroupsToStorage(groups) {
     // Save to object on client side
     storedTabGroups = groups;
 
@@ -31,7 +29,63 @@ chrome.storage.session.get().then( groups => {
         // Load Tabs with Group Decorations
         loadActiveTabsInTable();
     })
-})
+}
+
+function getTabGroups() {
+    // Check if Groups Exists In Storage
+    chrome.storage.session.get().then(groups => mergeTabGroupsToStorage(groups))
+}
+function resetColorGrid(target) {
+    const colorGrid = target.parentElement.children;
+    for (tile of colorGrid) {
+        if (tile.classList.contains("selected")) {
+            tile.classList.remove("selected")
+        }
+    }
+}
+function addEventListeners() {
+    // Select All
+    document.getElementById("select-all").addEventListener("click", (event) => {
+        // Loop through all tab checkboxes and set value to value of select all checkbox
+        [...document.getElementsByClassName("tab-row-checkbox")].forEach(checkbox => {
+            checkbox.checked = event.target.checked
+        })
+    })
+
+    // Color Grid Selector
+    document.getElementById("color-grid").addEventListener("click", event => {
+        const targetClassList = event.target.classList;
+    
+        resetColorGrid(event.target)
+        
+        if (classContains(targetClassList, "color-tile")) {
+            addClass(targetClassList, "selected");
+            addGroupSettings.color = getAttribute(event.target, "data-color")
+        }
+    })
+    // Create Button
+    document.getElementById("create-group-button").addEventListener("click", (event) => {
+        // Color selected?
+            // If no, randomly select one
+        // Name selected?
+            // If no, empty string
+        // Alias selecteD?
+            // If no name selected?
+                // if yes use name
+                // if no then empty string
+        // Record expand on create behavior
+
+        // Add to storedTabGroups
+        // Save full storedTabGroups to storage
+    })
+}
+
+function createNewGroupInit() {
+    getTabGroups()
+    addEventListeners()
+}
+
+
 
 function loadActiveTabsInTable() {
 
@@ -50,6 +104,9 @@ function loadActiveTabsInTable() {
 
     // Grab all active tabs
     chrome.tabs.query({}, tabs => {
+        // sort by whether a tab has a group ID last
+        tabs.sort( (a, b) => a.groupId - b.groupId);
+
         tabs.forEach(tab => {
 
             // Filter out tabby urls
@@ -79,13 +136,13 @@ function loadActiveTabsInTable() {
 function buildTableDataItem(icon, title, url, tabId, groupColor, groupName){
 
     // Uncheck already grouped tabs by default
-    let noGroupMembership = "checked";
+    let isNotExistingGroupMember = "checked";
     if (groupColor) {
-        noGroupMembership = "unchecked"
+        isNotExistingGroupMember = "unchecked"
     }
     return `
-        <tr class="" style="background-color:${groupColor};">
-            <td class="small-col"><input type="checkbox" ${noGroupMembership} data-tab-id="${tabId}" /></td>
+        <tr style="background-color:${groupColor};">
+            <td class="small-col"><input class="tab-row-checkbox" type="checkbox" ${isNotExistingGroupMember} data-tab-id="${tabId}" /></td>
             <td class="small-col">${!! groupName ? groupName : ""}</td>
             <td><img class="tab-icon" src="${icon ? icon : DEFAULT_ICON}"/></td>
             <td class="cell-overflow">${title}</td>
@@ -94,13 +151,4 @@ function buildTableDataItem(icon, title, url, tabId, groupColor, groupName){
     `
 }
 
-
-// Add document listener for click Create/
-// Check if name is given if not send empty string
-// Check if alias is given, if not check if name is given. If so set name, otherwise set empty string
-// Check if color is set, if not pick random color
-// Expand group on create check if it is set
-
-
-// Add to object
-// Save full object to groups
+createNewGroupInit()
