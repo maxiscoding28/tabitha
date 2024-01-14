@@ -11,6 +11,7 @@ const COLOR_MAPPING = {
     orange: "#FEAE6F"
 }
 let storedTabGroups = {};
+let newGroupData = {};
 
 function mergeTabGroupsToStorage(groups) {
     // Save to object on client side
@@ -58,15 +59,16 @@ function addEventListeners() {
     
         resetColorGrid(event.target)
         
-        if (classContains(targetClassList, "color-tile")) {
-            addClass(targetClassList, "selected");
-            addGroupSettings.color = getAttribute(event.target, "data-color")
+        if (targetClassList.contains("color-tile")) {
+            targetClassList.add("selected");
+            newGroupData.color = getAttribute(event.target, "data-color")
         }
     })
     // Create Button
     document.getElementById("create-group-button").addEventListener("click", (event) => {
-        // Color selected?
-            // If no, randomly select one
+        if (! newGroupData.color) {
+            // randomlySelectColor
+        }
         // Name selected?
             // If no, empty string
         // Alias selecteD?
