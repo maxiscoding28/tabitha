@@ -10,90 +10,13 @@ const COLOR_MAPPING = {
     cyan: "#7FE3F3",
     orange: "#FEAE6F"
 }
-
-function addEventListeners() {
-    // Select All
-    document.getElementById("select-all").addEventListener("click", (event) => {
-        // Loop through all tab checkboxes and set value to value of select all checkbox
-        [...document.getElementsByClassName("tab-row-checkbox")].forEach(checkbox => {
-            checkbox.checked = event.target.checked
-        })
-    })
-
-    // Color Grid Selector
-    document.getElementById("color-grid").addEventListener("click", event => {
-        const targetClassList = event.target.classList;
-    
-        resetColorGrid(event.target)
-        
-        if (targetClassList.contains("color-tile")) {
-            targetClassList.add("selected");
-            newGroupData.color = event.target.getAttribute("data-color")
-        }
-    })
-    // Create Button
-    document.getElementById("create-group-button").addEventListener("click", (event) => {
-        if (! newGroupData.color) {
-            randomColorTile()
-        }
-        if (! nameSelected() ) {
-            newGroupData.title = ""
-        }
-        else {
-            newGroupData.title = document.getElementById("name").value;
-        }
-        if (! aliasSelected()) {
-            if (newGroupData.title.length > 0) {
-                newGroupData.alias = newGroupData.title
-            }
-            else {
-                newGroupData.alias = ""
-            }
-        }
-        else {
-            newGroupData.alias = document.getElementById("alias").value;
-        }
-        newGroupData.expandOnCreate = document.getElementById("on-open-behavior").checked;
-
-
-        // Create Group
-        let selectedTabCount = 0;
-        const [...tabCheckboxes] = document.querySelectorAll('[data-tab-id]');
-        tabCheckboxes.forEach(tabCheckbox => {
-            const tabIdInteger = parseInt(tabCheckbox.getAttribute("data-tab-id"));
-            if (tabCheckbox.checked) {
-                selectedTabCount += 1;
-                selectedTabsToGroup.push(tabIdInteger);
-            }
-        })
-        // Need validation if no tabs selected
-
-        chrome.tabs.group({tabIds: selectedTabsToGroup}, (data) => {
-            chrome.tabGroups.update(
-                data,
-                {
-                    collapsed: ! newGroupData.expandOnCreate,
-                    color: newGroupData.color,
-                    title: newGroupData.title
-                }, (data) => {
-                    let payload = {}
-                    payload[data.id] = data;
-                    chrome.storage.session.set(payload)
-                }
-            )
-        })
-        // Add to Storage
-    })
-}
-function getTabGroups() {
-}
-function createNewGroupInit() {
-    getTabGroups()
-    addEventListeners()
-}
-// createNewGroupInit()
-
-const CreateNewGroupComponent = class {
+const CreateNewGroupComponent = class { 
+    static isGroupMember (id) {
+        return id > -1;
+    }
+    static isTabithaTab(url) {
+        return url.startsWith(`chrome-extension://${chrome.runtime.id}`)
+    }
     constructor() {
         this.selectedTabsToGroup = [];
         this.storedTabGroups = {};
@@ -105,39 +28,35 @@ const CreateNewGroupComponent = class {
         }
 
         this.getTabGroups()
-        this.addEventListener()
+        this.addEventListeners()
     }
-
+    getTableBodyElement() {
+        return document.getElementById("table").getElementsByTagName('tbody')[0]
+    }
     getTabGroups() {
-        chrome.storage.session.get().then(groups => mergeTabGroupsToStorage(groups))
+        chrome.storage.session.get().then(groups => this.mergeTabGroupsToStorage(groups))
     }
-
+    getTabGroupHexColor(id) {
+        return COLOR_MAPPING[this.storedTabGroups[id.toString()].color]
+    }
+    getTabGroupTitle(id) {
+        return this.storedTabGroups[id.toString()].title
+    }
+    setTableHeaders() {
+        this.getTableBodyElement().innerHTML = `
+            <tr>
+                <th class="small-col">Include?</th>
+                <th class="small-col">Group?</th>
+                <th>Tab Icon</th>
+                <th>Tab Title</th>
+                <th>Tab Url</th>
+            </tr>
+        `;
+    }
     mergeTabGroupsToStorage(groups) {
-        // Save to object on client side
         this.storedTabGroups = groups;
-    
-        // Retrieve all chrome tab groups
-        chrome.tabGroups.query({}, (chromeTabGroups) => {
-            chromeTabGroups.forEach(chromeTabGroup => {
-    
-                // If chrome tab group doesn't exist in storedTabGroups, create it.
-                if (! (chromeTabGroup.id in storedTabGroups)) {
-                    storedTabGroups[chromeTabGroup.id] = chromeTabGroup;
-                    
-                    // Get Tabs for Group
-                    // Create Group
-                    // Update Tab Group with Properties
-                    // Add Tabs to storage object
-                    // Add alias empty string to storage object
-                }
-            })
-    
-            // Create Groups via API
-            // Load Tabs with Group Decorations
-            loadActiveTabsInTable();
-        })
+        this.loadActiveTabsInTable();
     }
-
     resetColorGrid(target) {
         const colorGrid = target.parentElement.children;
         for (tile of colorGrid) {
@@ -162,61 +81,108 @@ const CreateNewGroupComponent = class {
     }
     
     loadActiveTabsInTable() {
-    
-        // Grab table body
-        const tableBody = document.getElementById("table").getElementsByTagName('tbody')[0];
-        
-        // Add headers
-        tableBody.innerHTML = `
-            <tr>
-                <th class="small-col">Include?</th>
-                <th class="small-col">Group?</th>
-                <th>Tab Icon</th>
-                <th>Tab Title</th>
-                <th>Tab Url</th>
-            </tr>`;
-    
-        // Grab all active tabs
+        this.setTableHeaders()
         chrome.tabs.query({}, tabs => {
-            // sort by whether a tab has a group ID last
+            let checkedIfNoGroupMembership = "checked";
             tabs.sort( (a, b) => a.groupId - b.groupId);
-    
             tabs.forEach(tab => {
-    
-                // Filter out tabby urls
-                if (! tab.url.startsWith(`chrome-extension://${chrome.runtime.id}`)) {
-    
-                    // Check if tab is member of group
-                    // If so, lookup color and name
-                    if (tab.groupId > -1) {
-                        tab.groupColor = COLOR_MAPPING[storedTabGroups[tab.groupId.toString()].color]
-                        tab.groupName = storedTabGroups[tab.groupId.toString()].title
+                if (! CreateNewGroupComponent.isTabithaTab(tab.url) ) {
+                    if (CreateNewGroupComponent.isGroupMember(tab.groupId)) {
+                        tab.groupColor = this.getTabGroupHexColor(tab.groupId)
+                        tab.groupTitle = this.getTabGroupTitle(tab.groupId)
+                        checkedIfNoGroupMembership = "unchecked"
                     }
-    
-                    // Build the HTML for the tab
-                    tableBody.innerHTML += buildTableDataItem(
+                    this.getTableBodyElement().innerHTML += this.buildTableDataItem(
                         tab.favIconUrl, 
                         tab.title, 
                         tab.url, 
                         tab.id,
                         tab.groupColor,
-                        tab.groupName
+                        tab.groupTitle,
+                        checkedIfNoGroupMembership
                     )
                 }
             })
-    
-            });
+        });
     }
-    buildTableDataItem(icon, title, url, tabId, groupColor, groupName){
+    addEventListeners() {
+        // Select All
+        document.getElementById("select-all").addEventListener("click", (event) => {
+            // Loop through all tab checkboxes and set value to value of select all checkbox
+            [...document.getElementsByClassName("tab-row-checkbox")].forEach(checkbox => {
+                checkbox.checked = event.target.checked
+            })
+        })
     
-        // Uncheck already grouped tabs by default
-        let isNotExistingGroupMember = "checked";
-        if (groupColor) {
-            isNotExistingGroupMember = "unchecked"
-        }
+        // Color Grid Selector
+        document.getElementById("color-grid").addEventListener("click", event => {
+            const targetClassList = event.target.classList;
+        
+            resetColorGrid(event.target)
+            
+            if (targetClassList.contains("color-tile")) {
+                targetClassList.add("selected");
+                newGroupData.color = event.target.getAttribute("data-color")
+            }
+        })
+        // Create Button
+        document.getElementById("create-group-button").addEventListener("click", (event) => {
+            if (! newGroupData.color) {
+                randomColorTile()
+            }
+            if (! nameSelected() ) {
+                newGroupData.title = ""
+            }
+            else {
+                newGroupData.title = document.getElementById("name").value;
+            }
+            if (! aliasSelected()) {
+                if (newGroupData.title.length > 0) {
+                    newGroupData.alias = newGroupData.title
+                }
+                else {
+                    newGroupData.alias = ""
+                }
+            }
+            else {
+                newGroupData.alias = document.getElementById("alias").value;
+            }
+            newGroupData.expandOnCreate = document.getElementById("on-open-behavior").checked;
+    
+    
+            // Create Group
+            let selectedTabCount = 0;
+            const [...tabCheckboxes] = document.querySelectorAll('[data-tab-id]');
+            tabCheckboxes.forEach(tabCheckbox => {
+                const tabIdInteger = parseInt(tabCheckbox.getAttribute("data-tab-id"));
+                if (tabCheckbox.checked) {
+                    selectedTabCount += 1;
+                    selectedTabsToGroup.push(tabIdInteger);
+                }
+            })
+            // Need validation if no tabs selected
+    
+            chrome.tabs.group({tabIds: selectedTabsToGroup}, (data) => {
+                chrome.tabGroups.update(
+                    data,
+                    {
+                        collapsed: ! newGroupData.expandOnCreate,
+                        color: newGroupData.color,
+                        title: newGroupData.title
+                    }, (data) => {
+                        let payload = {}
+                        payload[data.id] = data;
+                        chrome.storage.session.set(payload)
+                    }
+                )
+            })
+            // Add to Storage
+        })
+    }
+    buildTableDataItem(icon, title, url, tabId, groupColor, groupName, noGroupMemberChecked){
         return `
             <tr style="background-color:${groupColor};">
-                <td class="small-col"><input class="tab-row-checkbox" type="checkbox" ${isNotExistingGroupMember} data-tab-id="${tabId}" /></td>
+                <td class="small-col"><input class="tab-row-checkbox" type="checkbox" ${noGroupMemberChecked} data-tab-id="${tabId}" /></td>
                 <td class="small-col">${!! groupName ? groupName : ""}</td>
                 <td><img class="tab-icon" src="${icon ? icon : DEFAULT_ICON}"/></td>
                 <td class="cell-overflow">${title}</td>
@@ -225,3 +191,5 @@ const CreateNewGroupComponent = class {
         `
     }
 }
+
+new CreateNewGroupComponent()
