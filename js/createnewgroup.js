@@ -10,6 +10,7 @@ const COLOR_MAPPING = {
     cyan: "#7FE3F3",
     orange: "#FEAE6F"
 }
+let selectedTabsToGroup = [];
 let storedTabGroups = {};
 let newGroupData = {
     color: "",
@@ -32,6 +33,7 @@ function mergeTabGroupsToStorage(groups) {
             }
         })
 
+        // Create Groups via API
         // Load Tabs with Group Decorations
         loadActiveTabsInTable();
     })
@@ -41,6 +43,7 @@ function getTabGroups() {
     // Check if Groups Exists In Storage
     chrome.storage.session.get().then(groups => mergeTabGroupsToStorage(groups))
 }
+
 function resetColorGrid(target) {
     const colorGrid = target.parentElement.children;
     for (tile of colorGrid) {
@@ -49,14 +52,21 @@ function resetColorGrid(target) {
         }
     }
 }
+
 function randomColorTile() {
     const colors = Object.keys(COLOR_MAPPING);
     let randomIndex = Math.floor(Math.random() * colors.length);
     newGroupData.color = colors[randomIndex];
 }
+
 function nameSelected() {
     return document.getElementById("name").value.length > 0;
 }
+
+function aliasSelected() {
+    return document.getElementById("alias").value.length > 0;
+}
+
 function addEventListeners() {
     // Select All
     document.getElementById("select-all").addEventListener("click", (event) => {
@@ -79,12 +89,14 @@ function addEventListeners() {
     })
     // Create Button
     document.getElementById("create-group-button").addEventListener("click", (event) => {
-        debugger
         if (! newGroupData.color) {
             randomColorTile()
         }
         if (! nameSelected() ) {
             newGroupData.title = ""
+        }
+        else {
+            newGroupData.title = document.getElementById("name").value;
         }
         if (! aliasSelected()) {
             if (newGroupData.title.length > 0) {
@@ -94,10 +106,38 @@ function addEventListeners() {
                 newGroupData.alias = ""
             }
         }
-        expandOnCreate = document.getElementById("on-open-behavior").checked;
+        else {
+            newGroupData.alias = document.getElementById("alias").value;
+        }
+        newGroupData.expandOnCreate = document.getElementById("on-open-behavior").checked;
+
 
         // Create Group
+        let selectedTabCount = 0;
+        const [...tabCheckboxes] = document.querySelectorAll('[data-tab-id]');
+        tabCheckboxes.forEach(tabCheckbox => {
+            const tabIdInteger = parseInt(tabCheckbox.getAttribute("data-tab-id"));
+            if (tabCheckbox.checked) {
+                selectedTabCount += 1;
+                selectedTabsToGroup.push(tabIdInteger);
+            }
+        })
+        // Need validation if no tabs selected
 
+        chrome.tabs.group({tabIds: selectedTabsToGroup}, (data) => {
+            chrome.tabGroups.update(
+                data,
+                {
+                    collapsed: ! newGroupData.expandOnCreate,
+                    color: newGroupData.color,
+                    title: newGroupData.title
+                }, (data) => {
+                    let payload = {}
+                    payload[data.id] = data;
+                    chrome.storage.session.set(payload)
+                }
+            )
+        })
         // Add to Storage
 
     })
