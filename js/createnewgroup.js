@@ -11,7 +11,12 @@ const COLOR_MAPPING = {
     orange: "#FEAE6F"
 }
 let storedTabGroups = {};
-let newGroupData = {};
+let newGroupData = {
+    color: "",
+    title: "",
+    alias: "",
+    expandOnCreate: false
+};
 
 function mergeTabGroupsToStorage(groups) {
     // Save to object on client side
@@ -44,6 +49,14 @@ function resetColorGrid(target) {
         }
     }
 }
+function randomColorTile() {
+    const colors = Object.keys(COLOR_MAPPING);
+    let randomIndex = Math.floor(Math.random() * colors.length);
+    newGroupData.color = colors[randomIndex];
+}
+function nameSelected() {
+    return document.getElementById("name").value.length > 0;
+}
 function addEventListeners() {
     // Select All
     document.getElementById("select-all").addEventListener("click", (event) => {
@@ -61,24 +74,32 @@ function addEventListeners() {
         
         if (targetClassList.contains("color-tile")) {
             targetClassList.add("selected");
-            newGroupData.color = getAttribute(event.target, "data-color")
+            newGroupData.color = event.target.getAttribute("data-color")
         }
     })
     // Create Button
     document.getElementById("create-group-button").addEventListener("click", (event) => {
+        debugger
         if (! newGroupData.color) {
-            // randomlySelectColor
+            randomColorTile()
         }
-        // Name selected?
-            // If no, empty string
-        // Alias selecteD?
-            // If no name selected?
-                // if yes use name
-                // if no then empty string
-        // Record expand on create behavior
+        if (! nameSelected() ) {
+            newGroupData.title = ""
+        }
+        if (! aliasSelected()) {
+            if (newGroupData.title.length > 0) {
+                newGroupData.alias = newGroupData.title
+            }
+            else {
+                newGroupData.alias = ""
+            }
+        }
+        expandOnCreate = document.getElementById("on-open-behavior").checked;
 
-        // Add to storedTabGroups
-        // Save full storedTabGroups to storage
+        // Create Group
+
+        // Add to Storage
+
     })
 }
 
