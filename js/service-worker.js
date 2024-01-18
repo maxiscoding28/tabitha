@@ -13,6 +13,7 @@ chrome.runtime.onMessage.addListener(function (message) {
 });
 
 chrome.tabGroups.onCreated.addListener( tabGroup => {
+  // Check if it already exists in storage - tabitha created
   chrome.tabs.query({groupId: tabGroup.id}, function(tabsArray){
     let storagePayload = {};
     let tabGroupObjectForStorage = {
@@ -31,9 +32,14 @@ chrome.tabGroups.onCreated.addListener( tabGroup => {
 
 // On Updated
 chrome.tabGroups.onUpdated.addListener( tabGroup => {
-  debugger
+    // Check if it already exists in storage - tabitha created
+
+    // Find group in storage
+    // Update color and title
+    // Add alias
+    // Save to storage
+    debugger
 })
-// Add Title and Color
 
 // On Deleted
 // Remove from Storage
