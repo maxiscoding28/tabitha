@@ -12,8 +12,6 @@ chrome.runtime.onMessage.addListener(function (message) {
 chrome.tabGroups.onCreated.addListener( tabGroup => {
   // Check if it already exists in storage - tabitha created
   // If not then store
-  debugger
-  
   chrome.tabs.query({groupId: tabGroup.id}, function(tabsArray){
     let storagePayload = {};
     let tabGroupObjectForStorage = {

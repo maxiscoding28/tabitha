@@ -31,7 +31,7 @@ const CreateNewGroupComponent = class {
         this.addEventListeners()
     }
     getTabGroupTitle() {
-        return document.getElementById("name").value;
+        return document.getElementById("title").value;
     }
     getTabGroupAlias() {
         return document.getElementById("alias").value;
@@ -43,10 +43,8 @@ const CreateNewGroupComponent = class {
         chrome.storage.session.get().then(groups => this.mergeTabGroupsToStorage(groups))
     }
     getTabGroupHexColor(id) {
+        // debugger
         return COLOR_MAPPING[this.storedTabGroups[id.toString()].color]
-    }
-    getTabGroupTitle(id) {
-        return this.storedTabGroups[id.toString()].title
     }
     setTableHeaders() {
         this.getTableBodyElement().innerHTML = `
@@ -75,10 +73,10 @@ const CreateNewGroupComponent = class {
     randomColorTile() {
         const colors = Object.keys(COLOR_MAPPING);
         let randomIndex = Math.floor(Math.random() * colors.length);
-        newGroupData.color = colors[randomIndex];
+        this.newGroupData.color = colors[randomIndex];
     }
     nameSelected() {
-        return document.getElementById("name").value.length > 0;
+        return document.getElementById("title").value.length > 0;
     }
     aliasSelected() {
         return document.getElementById("alias").value.length > 0;
@@ -132,20 +130,20 @@ const CreateNewGroupComponent = class {
                 this.newGroupData.title = "";
             }
             else {
-                newGroupData.title = this.getTabGroupTitle();
+                this.newGroupData.title = this.getTabGroupTitle();
             }
-            if (! aliasSelected()) {
-                if (newGroupData.title.length > 0) {
-                    newGroupData.alias = newGroupData.title
+            if (! this.aliasSelected()) {
+                if (this.newGroupData.title.length > 0) {
+                    this.newGroupData.alias = newGroupData.title
                 }
                 else {
-                    newGroupData.alias = ""
+                    this.newGroupData.alias = ""
                 }
             }
             else {
-                newGroupData.alias = this.getTabGroupAlias;
+                this.newGroupData.alias = this.getTabGroupAlias;
             }
-            newGroupData.expandOnCreate = document.getElementById("on-open-behavior").checked;
+            this.newGroupData.expandOnCreate = document.getElementById("on-open-behavior").checked;
     
     
             // Create Group
@@ -154,27 +152,24 @@ const CreateNewGroupComponent = class {
             tabCheckboxes.forEach(tabCheckbox => {
                 const tabIdInteger = parseInt(tabCheckbox.getAttribute("data-tab-id"));
                 if (tabCheckbox.checked) {
-                    selectedTabCount += 1;
-                    selectedTabsToGroup.push(tabIdInteger);
+                    this.selectedTabCount += 1;
+                    this.selectedTabsToGroup.push(tabIdInteger);
                 }
             })
             // Need validation if no tabs selected
     
-            chrome.tabs.group({tabIds: selectedTabsToGroup}, (data) => {
+            chrome.tabs.group({tabIds: this.selectedTabsToGroup}, (groupId) => {
                 chrome.tabGroups.update(
-                    data,
+                    groupId,
                     {
-                        collapsed: ! newGroupData.expandOnCreate,
-                        color: newGroupData.color,
-                        title: newGroupData.title
+                        collapsed: ! this.newGroupData.expandOnCreate,
+                        color: this.newGroupData.color,
+                        title: this.newGroupData.title
                     }, (data) => {
-                        let payload = {}
-                        payload[data.id] = data;
-                        chrome.storage.session.set(payload)
+                        debugger
                     }
                 )
             })
-            // Add to Storage
         })
     }
     buildTableDataItem(icon, title, url, tabId, groupColor, groupName, noGroupMemberChecked){
