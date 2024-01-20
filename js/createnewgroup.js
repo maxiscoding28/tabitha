@@ -30,6 +30,12 @@ const CreateNewGroupComponent = class {
         this.getTabGroups()
         this.addEventListeners()
     }
+    getTabGroupTitle() {
+        return document.getElementById("name").value;
+    }
+    getTabGroupAlias() {
+        return document.getElementById("alias").value;
+    }
     getTableBodyElement() {
         return document.getElementById("table").getElementsByTagName('tbody')[0]
     }
@@ -59,27 +65,24 @@ const CreateNewGroupComponent = class {
     }
     resetColorGrid(target) {
         const colorGrid = target.parentElement.children;
-        for (tile of colorGrid) {
+        for (let i = 0; i < colorGrid.length; i++) {
+            let tile = colorGrid[i];
             if (tile.classList.contains("selected")) {
                 tile.classList.remove("selected")
             }
         }
     }
-    
     randomColorTile() {
         const colors = Object.keys(COLOR_MAPPING);
         let randomIndex = Math.floor(Math.random() * colors.length);
         newGroupData.color = colors[randomIndex];
     }
-    
     nameSelected() {
         return document.getElementById("name").value.length > 0;
     }
-    
     aliasSelected() {
         return document.getElementById("alias").value.length > 0;
     }
-    
     loadActiveTabsInTable() {
         this.setTableHeaders()
         chrome.tabs.query({}, tabs => {
@@ -106,35 +109,30 @@ const CreateNewGroupComponent = class {
         });
     }
     addEventListeners() {
-        // Select All
         document.getElementById("select-all").addEventListener("click", (event) => {
-            // Loop through all tab checkboxes and set value to value of select all checkbox
             [...document.getElementsByClassName("tab-row-checkbox")].forEach(checkbox => {
                 checkbox.checked = event.target.checked
             })
         })
     
-        // Color Grid Selector
         document.getElementById("color-grid").addEventListener("click", event => {
             const targetClassList = event.target.classList;
-        
-            resetColorGrid(event.target)
+            this.resetColorGrid(event.target)
             
             if (targetClassList.contains("color-tile")) {
                 targetClassList.add("selected");
-                newGroupData.color = event.target.getAttribute("data-color")
+                this.newGroupData.color = event.target.getAttribute("data-color")
             }
         })
-        // Create Button
         document.getElementById("create-group-button").addEventListener("click", (event) => {
-            if (! newGroupData.color) {
-                randomColorTile()
+            if (! this.newGroupData.color) {
+                this.randomColorTile()
             }
-            if (! nameSelected() ) {
-                newGroupData.title = ""
+            if (! this.nameSelected() ) {
+                this.newGroupData.title = "";
             }
             else {
-                newGroupData.title = document.getElementById("name").value;
+                newGroupData.title = this.getTabGroupTitle();
             }
             if (! aliasSelected()) {
                 if (newGroupData.title.length > 0) {
@@ -145,7 +143,7 @@ const CreateNewGroupComponent = class {
                 }
             }
             else {
-                newGroupData.alias = document.getElementById("alias").value;
+                newGroupData.alias = this.getTabGroupAlias;
             }
             newGroupData.expandOnCreate = document.getElementById("on-open-behavior").checked;
     
